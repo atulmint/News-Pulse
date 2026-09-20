@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Source {
+  id        String    @id @default(uuid())
+  name      String
+  feedUrl   String    @unique @map("feed_url")
+  homeUrl   String    @map("home_url")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  articles  Article[]
+
+  @@map("sources")
+}
+
+model Cluster {
+  id                  String    @id @default(uuid())
+  label               String
+  // Title of the most central article in the cluster, used as the display label.
+  representativeTitle String    @map("representative_title")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  articles            Article[]
+
+  @@map("clusters")
+}
+
+model Article {
+  id          String    @id @default(uuid())
+  sourceId    String    @map("source_id")
+  clusterId   String?   @map("cluster_id")
+  title       String
+  url         String    @unique
+  guid        String?   @map("guid")
+  publishedAt DateTime? @map("published_at")
+  content     String?
+  summary     String?
+  // SHA-256 of the extracted body, used to detect cross-source duplicates.
+  contentHash String?   @map("content_hash")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  source      Source    @relation(fields: [sourceId], references: [id])
+  cluster     Cluster?  @relation(fields: [clusterId], references: [id])
+
+  @@unique([sourceId, guid])
+  @@map("articles")
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model IngestionJob {
+  id              String    @id @default(uuid())
+  status          JobStatus @default(PENDING)
+  articlesFound   Int       @default(0) @map("articles_found")
+  articlesNew     Int       @default(0) @map("articles_new")
+  clustersUpdated Int       @default(0) @map("clusters_updated")
+  errorMessage    String?   @map("error_message")
+  startedAt       DateTime? @map("started_at")
+  completedAt     DateTime? @map("completed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@map("ingestion_jobs")
+}
