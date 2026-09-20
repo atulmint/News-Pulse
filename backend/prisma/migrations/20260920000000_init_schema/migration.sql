@@ -1,5 +1,10 @@
--- CreateEnum
-CREATE TYPE "JobStatus" AS ENUM ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED');
+-- CreateEnum (Safely handling pre-existing type from shared database)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'JobStatus') THEN
+        CREATE TYPE "JobStatus" AS ENUM ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED');
+    END IF;
+END $$;
 
 -- CreateTable
 CREATE TABLE "sources" (
