@@ -32,5 +32,5 @@ ENV PORT=3001
 
 EXPOSE 3001
 
-# Command to run production server from /app/backend
-CMD ["node", "dist/main.js"]
+# Automatically apply pending Prisma migrations before starting NestJS HTTP server
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
