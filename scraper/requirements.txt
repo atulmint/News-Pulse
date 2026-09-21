@@ -3,6 +3,7 @@ httpx[http2]==0.27.2
 trafilatura==1.12.2
 beautifulsoup4==4.12.3
 lxml==5.3.0
+lxml_html_clean==0.4.1
 scikit-learn==1.5.2
 numpy==1.26.4
 psycopg2-binary==2.9.9
